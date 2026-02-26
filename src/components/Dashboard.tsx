@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Settings, Trash2, Home, Heart, MessageCircleHeart, Wind, Moon, Sun, Globe, Bot, BarChart2 } from 'lucide-react';
+import { Settings, Trash2, Home, Heart, MessageCircleHeart, Wind, Moon, Sun, Globe, Bot, BarChart2, Activity } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { UserData, ChatMessage, CravingLog } from '../types';
 import { HomeTab } from './HomeTab';
 import { HealthTab } from './HealthTab';
@@ -27,7 +28,7 @@ export function Dashboard({
   userData, now, theme, language, chatHistory, cravings,
   onOpenSettings, onReset, onToggleTheme, onToggleLanguage, onSendMessage, onLogCraving
 }: Props) {
-  const [activeTab, setActiveTab] = useState<'home' | 'health' | 'support' | 'coach' | 'analytics'>('home');
+  const [activeTab, setActiveTab] = useState<'home' | 'health' | 'support' | 'coach' | 'analytics' | 'exercise'>('home');
 
   const isAr = language === 'ar';
   const quitDate = new Date(userData.quitDate);
@@ -37,6 +38,12 @@ export function Dashboard({
   const hours = Math.floor((diffInSeconds % (3600 * 24)) / 3600);
   const minutes = Math.floor((diffInSeconds % 3600) / 60);
   const seconds = diffInSeconds % 60;
+
+  const tabVariants = {
+    initial: { opacity: 0, y: 20 },
+    animate: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -20 }
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-28 transition-colors">
@@ -61,6 +68,7 @@ export function Dashboard({
             {activeTab === 'support' && (isAr ? 'الدعم النفسي' : 'Soutien')}
             {activeTab === 'coach' && (isAr ? 'المدرب الذكي' : 'Coach IA')}
             {activeTab === 'analytics' && (isAr ? 'التحليلات' : 'Analytique')}
+            {activeTab === 'exercise' && (isAr ? 'تمارين' : 'Exercices')}
           </h1>
           <div className="flex gap-2">
             <button onClick={onToggleLanguage} className="p-2 bg-white/20 rounded-full hover:bg-white/30 transition-colors">
@@ -107,11 +115,23 @@ export function Dashboard({
 
       {/* Content Area */}
       <div className={`px-6 relative z-20 space-y-4 ${activeTab === 'home' ? '-mt-6' : 'mt-6'}`}>
-        {activeTab === 'home' && <HomeTab userData={userData} diffInSeconds={diffInSeconds} language={language} onLogCraving={onLogCraving} />}
-        {activeTab === 'health' && <HealthTab diffInSeconds={diffInSeconds} language={language} />}
-        {activeTab === 'support' && <SupportTab language={language} />}
-        {activeTab === 'coach' && <AICoachTab chatHistory={chatHistory} onSendMessage={onSendMessage} language={language} />}
-        {activeTab === 'analytics' && <AnalyticsTab cravings={cravings} language={language} />}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            variants={tabVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            transition={{ duration: 0.2 }}
+          >
+            {activeTab === 'home' && <HomeTab userData={userData} diffInSeconds={diffInSeconds} language={language} onLogCraving={onLogCraving} />}
+            {activeTab === 'health' && <HealthTab diffInSeconds={diffInSeconds} language={language} />}
+            {activeTab === 'support' && <SupportTab language={language} />}
+            {activeTab === 'coach' && <AICoachTab chatHistory={chatHistory} onSendMessage={onSendMessage} language={language} />}
+            {activeTab === 'analytics' && <AnalyticsTab cravings={cravings} language={language} />}
+            {activeTab === 'exercise' && <ExerciseTab language={language} />}
+          </motion.div>
+        </AnimatePresence>
 
         {/* Reset Data Button (Only in Home bottom) */}
         {activeTab === 'home' && (
@@ -156,6 +176,13 @@ export function Dashboard({
         >
           <BarChart2 size={24} strokeWidth={activeTab === 'analytics' ? 2.5 : 2} />
           <span className="text-[10px] font-bold">{isAr ? 'تحليلات' : 'Stats'}</span>
+        </button>
+        <button 
+          onClick={() => setActiveTab('exercise')}
+          className={`flex flex-col items-center gap-1 transition-colors w-16 ${activeTab === 'exercise' ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}
+        >
+          <Activity size={24} strokeWidth={activeTab === 'exercise' ? 2.5 : 2} />
+          <span className="text-[10px] font-bold">{isAr ? 'تمارين' : 'Exercices'}</span>
         </button>
         <button 
           onClick={() => setActiveTab('support')}

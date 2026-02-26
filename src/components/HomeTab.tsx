@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { DollarSign, CigaretteOff, Clock, Lightbulb, Target, Award, PlusCircle } from 'lucide-react';
+import { DollarSign, CigaretteOff, Clock, Lightbulb, Target, Award, PlusCircle, TrendingUp } from 'lucide-react';
+import confetti from 'canvas-confetti';
 import { UserData, CravingLog } from '../types';
 import { MOTIVATIONAL_QUOTES, MOTIVATIONAL_QUOTES_FR } from '../utils/constants';
 
@@ -54,21 +55,46 @@ export function HomeTab({ userData, diffInSeconds, language, onLogCraving }: Pro
     { id: '24h', label: isAr ? '24 ساعة' : '24 heures', achieved: diffInSeconds >= 24 * 3600 },
     { id: '1w', label: isAr ? 'أسبوع' : '1 semaine', achieved: diffInSeconds >= 7 * 24 * 3600 },
     { id: '1m', label: isAr ? 'شهر' : '1 mois', achieved: diffInSeconds >= 30 * 24 * 3600 },
+    { id: '3m', label: isAr ? '3 أشهر' : '3 mois', achieved: diffInSeconds >= 90 * 24 * 3600 },
     { id: '1y', label: isAr ? 'سنة' : '1 an', achieved: diffInSeconds >= 365 * 24 * 3600 },
   ];
+
+  // RPG Leveling System
+  const calculateLevel = (seconds: number) => {
+    const days = seconds / (24 * 3600);
+    if (days < 1) return { level: 1, title: isAr ? 'مبتدئ' : 'Novice', next: 1, progress: days * 100 };
+    if (days < 7) return { level: 2, title: isAr ? 'متدرب' : 'Apprenti', next: 7, progress: (days / 7) * 100 };
+    if (days < 30) return { level: 3, title: isAr ? 'محارب' : 'Guerrier', next: 30, progress: (days / 30) * 100 };
+    if (days < 90) return { level: 4, title: isAr ? 'بطل' : 'Héros', next: 90, progress: (days / 90) * 100 };
+    if (days < 365) return { level: 5, title: isAr ? 'أسطورة' : 'Légende', next: 365, progress: (days / 365) * 100 };
+    return { level: 6, title: isAr ? 'معلم' : 'Maître', next: days + 1, progress: 100 };
+  };
+
+  const rpgStats = calculateLevel(diffInSeconds);
+
+  const [selectedTrigger, setSelectedTrigger] = useState('');
 
   const handleLogCraving = () => {
     onLogCraving({
       id: Date.now().toString(),
       timestamp: new Date().toISOString(),
       intensity: cravingIntensity,
-      trigger: '',
+      trigger: selectedTrigger,
       mood: ''
     });
     alert(isAr ? `تم تسجيل الرغبة بشدة ${cravingIntensity}` : `Envie enregistrée avec intensité ${cravingIntensity}`);
     setShowCravingModal(false);
     setCravingIntensity(5);
+    setSelectedTrigger('');
   };
+
+  const triggers = [
+    { id: 'stress', label: isAr ? 'توتر' : 'Stress', emoji: '😫' },
+    { id: 'coffee', label: isAr ? 'قهوة' : 'Café', emoji: '☕' },
+    { id: 'social', label: isAr ? 'اجتماعي' : 'Social', emoji: '👥' },
+    { id: 'boredom', label: isAr ? 'ملل' : 'Ennui', emoji: '🥱' },
+    { id: 'alcohol', label: isAr ? 'كحول' : 'Alcool', emoji: '🍷' },
+  ];
 
   return (
     <>
@@ -111,6 +137,29 @@ export function HomeTab({ userData, diffInSeconds, language, onLogCraving }: Pro
         </div>
       </div>
 
+      {/* RPG Leveling System */}
+      <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-100 dark:border-slate-800 transition-colors">
+        <div className="flex justify-between items-end mb-2">
+          <div>
+            <span className="text-xs font-bold text-amber-500 uppercase tracking-wider">
+              {isAr ? 'المستوى' : 'Niveau'} {rpgStats.level}
+            </span>
+            <h3 className="font-bold text-slate-800 dark:text-white text-lg">
+              {rpgStats.title}
+            </h3>
+          </div>
+          <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+            {isAr ? 'الهدف القادم:' : 'Prochain:'} {rpgStats.next} {isAr ? 'يوم' : 'jours'}
+          </span>
+        </div>
+        <div className="h-3 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+          <div 
+            className="h-full rounded-full transition-all duration-1000 bg-gradient-to-r from-amber-400 to-amber-600"
+            style={{ width: `${Math.min(100, rpgStats.progress)}%` }}
+          />
+        </div>
+      </div>
+
       {/* Badges Section */}
       <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-100 dark:border-slate-800 transition-colors">
         <div className="flex justify-between items-center mb-4">
@@ -120,6 +169,11 @@ export function HomeTab({ userData, diffInSeconds, language, onLogCraving }: Pro
           </h3>
           <button 
             onClick={() => {
+              confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 }
+              });
               const text = isAr 
                 ? `أنا فخور بأنني لم أدخن منذ ${diffInSeconds >= 24 * 3600 ? Math.floor(diffInSeconds / (24 * 3600)) + ' يوم' : Math.floor(diffInSeconds / 3600) + ' ساعة'}! 🎉`
                 : `Je suis fier de ne pas avoir fumé depuis ${diffInSeconds >= 24 * 3600 ? Math.floor(diffInSeconds / (24 * 3600)) + ' jours' : Math.floor(diffInSeconds / 3600) + ' heures'}! 🎉`;
@@ -134,13 +188,13 @@ export function HomeTab({ userData, diffInSeconds, language, onLogCraving }: Pro
             {isAr ? 'مشاركة' : 'Partager'}
           </button>
         </div>
-        <div className="flex justify-between">
+        <div className="flex gap-4 overflow-x-auto pb-2 snap-x">
           {badges.map(badge => (
-            <div key={badge.id} className="flex flex-col items-center gap-2">
+            <div key={badge.id} className="flex flex-col items-center gap-2 min-w-[60px] snap-center">
               <div className={`w-12 h-12 rounded-full flex items-center justify-center ${badge.achieved ? 'bg-amber-100 dark:bg-amber-900/50 text-amber-500' : 'bg-slate-100 dark:bg-slate-800 text-slate-300 dark:text-slate-600'}`}>
                 <Award size={24} />
               </div>
-              <span className={`text-xs font-bold ${badge.achieved ? 'text-slate-700 dark:text-slate-300' : 'text-slate-400 dark:text-slate-500'}`}>
+              <span className={`text-[10px] font-bold text-center ${badge.achieved ? 'text-slate-700 dark:text-slate-300' : 'text-slate-400 dark:text-slate-500'}`}>
                 {badge.label}
               </span>
             </div>
@@ -179,6 +233,29 @@ export function HomeTab({ userData, diffInSeconds, language, onLogCraving }: Pro
             <div className="text-center text-3xl font-bold text-rose-500 mb-6">
               {cravingIntensity}
             </div>
+            
+            <div className="mb-6">
+              <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3 text-center">
+                {isAr ? 'ما هو المحفز؟' : 'Quel est le déclencheur ?'}
+              </h4>
+              <div className="flex flex-wrap justify-center gap-2">
+                {triggers.map(trigger => (
+                  <button
+                    key={trigger.id}
+                    onClick={() => setSelectedTrigger(trigger.id)}
+                    className={`px-3 py-2 rounded-xl text-sm font-medium transition-colors flex items-center gap-1 ${
+                      selectedTrigger === trigger.id 
+                        ? 'bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-400 border-2 border-rose-500' 
+                        : 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-2 border-transparent'
+                    }`}
+                  >
+                    <span>{trigger.emoji}</span>
+                    <span>{trigger.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div className="flex gap-3">
               <button 
                 onClick={() => setShowCravingModal(false)}
@@ -241,6 +318,31 @@ export function HomeTab({ userData, diffInSeconds, language, onLogCraving }: Pro
           </div>
         </div>
       )}
+
+      {/* Investment Projection */}
+      <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-100 dark:border-slate-800 transition-colors">
+        <h3 className="font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
+          <TrendingUp className="text-blue-500" size={20} />
+          {isAr ? 'توقعات التوفير' : 'Prévisions d\'économies'}
+        </h3>
+        <div className="grid grid-cols-3 gap-2">
+          {[
+            { label: isAr ? 'سنة' : '1 an', multiplier: 365 },
+            { label: isAr ? '5 سنوات' : '5 ans', multiplier: 365 * 5 },
+            { label: isAr ? '10 سنوات' : '10 ans', multiplier: 365 * 10 }
+          ].map((period, idx) => {
+            const projectedSavings = ((userData.cigarettesPerDay / userData.cigarettesPerPack) * userData.pricePerPack * period.multiplier).toFixed(0);
+            return (
+              <div key={idx} className="bg-slate-50 dark:bg-slate-800 p-3 rounded-2xl text-center">
+                <div className="text-xs text-slate-500 dark:text-slate-400 mb-1">{period.label}</div>
+                <div className="font-bold text-emerald-600 dark:text-emerald-400 text-sm">
+                  {projectedSavings} {userData.currency}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
 
       <div className="bg-gradient-to-br from-emerald-500 to-teal-600 dark:from-emerald-600 dark:to-teal-800 rounded-3xl p-6 text-white shadow-md transition-colors">
         <div className="flex items-start gap-3">

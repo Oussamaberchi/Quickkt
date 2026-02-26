@@ -61,8 +61,41 @@ export function HealthTab({ diffInSeconds, language }: Props) {
 
   const colors = ['text-rose-500', 'text-blue-500', 'text-amber-500'];
 
+  // Lung healing progress (0 to 100) based on 9 months (approx 270 days) for full cilia regrowth
+  const lungHealingProgress = Math.min(100, (diffInSeconds / (270 * 24 * 3600)) * 100);
+
   return (
     <div className="space-y-4">
+      {/* Lung Visualization */}
+      <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-sm border border-slate-100 dark:border-slate-800 transition-colors">
+        <h2 className="text-lg font-bold text-slate-800 dark:text-white mb-4">
+          {isAr ? 'تعافي الرئتين' : 'Guérison des poumons'}
+        </h2>
+        <div className="flex flex-col items-center">
+          <div className="relative w-32 h-32 mb-4">
+            {/* Dark/Damaged Lungs */}
+            <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full text-slate-800 dark:text-slate-700">
+              <path fill="currentColor" d="M45,20 C30,10 10,30 15,60 C20,90 40,90 45,70 C45,70 50,50 45,20 Z" />
+              <path fill="currentColor" d="M55,20 C70,10 90,30 85,60 C80,90 60,90 55,70 C55,70 50,50 55,20 Z" />
+              <path fill="none" stroke="currentColor" strokeWidth="4" d="M50,5 L50,30 M45,20 L55,20" />
+            </svg>
+            
+            {/* Pink/Healthy Lungs (Overlay with clip-path based on progress) */}
+            <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full text-pink-400 transition-all duration-1000" style={{ clipPath: `polygon(0 ${100 - lungHealingProgress}%, 100% ${100 - lungHealingProgress}%, 100% 100%, 0 100%)` }}>
+              <path fill="currentColor" d="M45,20 C30,10 10,30 15,60 C20,90 40,90 45,70 C45,70 50,50 45,20 Z" />
+              <path fill="currentColor" d="M55,20 C70,10 90,30 85,60 C80,90 60,90 55,70 C55,70 50,50 55,20 Z" />
+              <path fill="none" stroke="currentColor" strokeWidth="4" d="M50,5 L50,30 M45,20 L55,20" />
+            </svg>
+          </div>
+          <div className="text-center">
+            <span className="text-2xl font-bold text-pink-500">{Math.floor(lungHealingProgress)}%</span>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+              {isAr ? 'تجدد أهداب الرئة وتنظيف الممرات الهوائية' : 'Régénération des cils pulmonaires et nettoyage des voies respiratoires'}
+            </p>
+          </div>
+        </div>
+      </div>
+
       <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-sm border border-slate-100 dark:border-slate-800 transition-colors">
         <h2 className="text-lg font-bold text-slate-800 dark:text-white mb-4">
           {isAr ? 'التعافي السريع' : 'Récupération rapide'}
