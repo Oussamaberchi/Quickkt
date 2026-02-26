@@ -2,6 +2,7 @@ import React from 'react';
 import { CravingLog } from '../types';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { Activity, Calendar, TrendingUp, Grid } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 interface Props {
   cravings: CravingLog[];
@@ -41,40 +42,42 @@ export function AnalyticsTab({ cravings, language }: Props) {
   });
 
   const getHeatmapColor = (count: number) => {
-    if (count === 0) return 'bg-slate-100 dark:bg-slate-800';
-    if (count === 1) return 'bg-rose-200 dark:bg-rose-900/40';
-    if (count === 2) return 'bg-rose-300 dark:bg-rose-800/60';
-    if (count === 3) return 'bg-rose-400 dark:bg-rose-700/80';
-    return 'bg-rose-500 dark:bg-rose-600';
+    if (count === 0) return 'bg-slate-800/50 border border-white/5';
+    if (count === 1) return 'bg-emerald-500/20 border border-emerald-500/30';
+    if (count === 2) return 'bg-emerald-500/40 border border-emerald-500/50';
+    if (count === 3) return 'bg-emerald-500/60 border border-emerald-500/70';
+    return 'bg-emerald-500 emerald-glow';
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6 pb-8">
       <div className="grid grid-cols-2 gap-4">
-        <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col items-center text-center transition-colors">
-          <div className="w-10 h-10 bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-400 rounded-full flex items-center justify-center mb-2">
-            <Activity size={20} />
+        <motion.div whileHover={{ scale: 1.02 }} className="glass-panel p-5 rounded-3xl flex flex-col items-center text-center relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-b from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+          <div className="w-12 h-12 bg-emerald-500/10 text-emerald-400 rounded-full flex items-center justify-center mb-3 group-hover:emerald-glow transition-all">
+            <Activity size={24} />
           </div>
-          <span className="text-xl font-bold text-slate-800 dark:text-white">{cravings.length}</span>
-          <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+          <span className="text-2xl font-bold text-white font-mono">{cravings.length}</span>
+          <span className="text-xs text-slate-400 font-medium mt-1 uppercase tracking-wider">
             {isAr ? 'إجمالي الرغبات' : 'Total des envies'}
           </span>
-        </div>
+        </motion.div>
         
-        <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col items-center text-center transition-colors">
-          <div className="w-10 h-10 bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400 rounded-full flex items-center justify-center mb-2">
-            <TrendingUp size={20} />
+        <motion.div whileHover={{ scale: 1.02 }} className="glass-panel p-5 rounded-3xl flex flex-col items-center text-center relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-b from-amber-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+          <div className="w-12 h-12 bg-amber-500/10 text-amber-400 rounded-full flex items-center justify-center mb-3 group-hover:shadow-[0_0_15px_rgba(245,158,11,0.3)] transition-all">
+            <TrendingUp size={24} />
           </div>
-          <span className="text-xl font-bold text-slate-800 dark:text-white">{avgIntensity} / 10</span>
-          <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+          <span className="text-2xl font-bold text-white font-mono">{avgIntensity} <span className="text-sm text-slate-500">/ 10</span></span>
+          <span className="text-xs text-slate-400 font-medium mt-1 uppercase tracking-wider">
             {isAr ? 'متوسط الشدة' : 'Intensité moyenne'}
           </span>
-        </div>
+        </motion.div>
       </div>
 
-      <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-sm border border-slate-100 dark:border-slate-800 transition-colors">
-        <h3 className="font-bold text-slate-800 dark:text-white mb-6 flex items-center gap-2">
-          <Calendar className="text-blue-500" size={20} />
+      <div className="glass-panel p-6 rounded-3xl">
+        <h3 className="font-bold text-white mb-6 flex items-center gap-2">
+          <Calendar className="text-emerald-400" size={20} />
           {isAr ? 'نمط الرغبات حسب اليوم' : "Modèle d'envies par jour"}
         </h3>
         
@@ -82,36 +85,38 @@ export function AnalyticsTab({ cravings, language }: Props) {
           <div className="h-64 w-full" dir="ltr">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#94A3B8', fontSize: 12 }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94A3B8', fontSize: 12 }} />
                 <Tooltip 
                   cursor={{ fill: 'rgba(16, 185, 129, 0.1)' }}
-                  contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                  contentStyle={{ backgroundColor: '#1E293B', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', color: '#F8FAFC' }}
+                  itemStyle={{ color: '#10B981' }}
                 />
-                <Bar dataKey="count" fill="#10b981" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="count" fill="#10B981" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         ) : (
-          <div className="h-40 flex items-center justify-center text-slate-400 text-sm text-center">
+          <div className="h-40 flex items-center justify-center text-slate-500 text-sm text-center border border-dashed border-slate-700 rounded-2xl">
             {isAr ? 'لا توجد بيانات كافية لعرض الرسم البياني. قم بتسجيل رغباتك من الصفحة الرئيسية.' : "Pas assez de données pour afficher le graphique. Enregistrez vos envies depuis la page d'accueil."}
           </div>
         )}
       </div>
-      <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-sm border border-slate-100 dark:border-slate-800 transition-colors">
-        <h3 className="font-bold text-slate-800 dark:text-white mb-6 flex items-center gap-2">
-          <Grid className="text-rose-500" size={20} />
+
+      <div className="glass-panel p-6 rounded-3xl">
+        <h3 className="font-bold text-white mb-6 flex items-center gap-2">
+          <Grid className="text-emerald-400" size={20} />
           {isAr ? 'خريطة الرغبات الحرارية (ساعة / يوم)' : "Carte thermique des envies (Heure / Jour)"}
         </h3>
         
         {cravings.length > 0 ? (
-          <div className="overflow-x-auto pb-4" dir="ltr">
+          <div className="overflow-x-auto pb-4 hide-scrollbar" dir="ltr">
             <div className="min-w-[600px]">
               <div className="flex mb-2">
                 <div className="w-12"></div>
                 {hours.map(hour => (
-                  <div key={hour} className="flex-1 text-center text-[10px] text-slate-400">
+                  <div key={hour} className="flex-1 text-center text-[10px] text-slate-500 font-mono">
                     {hour % 3 === 0 ? hour : ''}
                   </div>
                 ))}
@@ -119,13 +124,14 @@ export function AnalyticsTab({ cravings, language }: Props) {
               
               {days.map((day, dayIdx) => (
                 <div key={day} className="flex items-center mb-1">
-                  <div className="w-12 text-xs text-slate-500 font-medium text-right pr-2">
+                  <div className="w-12 text-xs text-slate-400 font-medium text-right pr-2">
                     {day}
                   </div>
                   {hours.map(hour => (
                     <div key={`${day}-${hour}`} className="flex-1 px-0.5">
-                      <div 
-                        className={`h-4 rounded-sm ${getHeatmapColor(heatmapData[dayIdx][hour])}`}
+                      <motion.div 
+                        whileHover={{ scale: 1.2 }}
+                        className={`h-4 rounded-sm transition-colors ${getHeatmapColor(heatmapData[dayIdx][hour])}`}
                         title={`${day} ${hour}:00 - ${heatmapData[dayIdx][hour]} ${isAr ? 'رغبات' : 'envies'}`}
                       />
                     </div>
@@ -135,7 +141,7 @@ export function AnalyticsTab({ cravings, language }: Props) {
             </div>
           </div>
         ) : (
-          <div className="h-40 flex items-center justify-center text-slate-400 text-sm text-center">
+          <div className="h-40 flex items-center justify-center text-slate-500 text-sm text-center border border-dashed border-slate-700 rounded-2xl">
             {isAr ? 'لا توجد بيانات كافية لعرض الخريطة الحرارية.' : "Pas assez de données pour afficher la carte thermique."}
           </div>
         )}

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { DollarSign, CigaretteOff, Clock, Lightbulb, Target, Award, PlusCircle, TrendingUp } from 'lucide-react';
+import { DollarSign, CigaretteOff, Clock, Lightbulb, Target, Award, PlusCircle, TrendingUp, Activity } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { motion } from 'framer-motion';
 import { UserData, CravingLog } from '../types';
 import { MOTIVATIONAL_QUOTES, MOTIVATIONAL_QUOTES_FR } from '../utils/constants';
 
@@ -34,16 +35,19 @@ function AnimatedCounter({ value }: { value: number }) {
   return <span>{displayValue}</span>;
 }
 
-export function HomeTab({ userData, diffInSeconds, language, onLogCraving }: Props) {
+export function HomeTab({ userData, diffInSeconds, language }: Props) {
   const [quoteOfDay, setQuoteOfDay] = useState('');
-  const [showCravingModal, setShowCravingModal] = useState(false);
-  const [cravingIntensity, setCravingIntensity] = useState(5);
   const isAr = language === 'ar';
 
   useEffect(() => {
     const quotes = isAr ? MOTIVATIONAL_QUOTES : MOTIVATIONAL_QUOTES_FR;
     setQuoteOfDay(quotes[Math.floor(Math.random() * quotes.length)]);
   }, [isAr]);
+
+  const days = Math.floor(diffInSeconds / (3600 * 24));
+  const hours = Math.floor((diffInSeconds % (3600 * 24)) / 3600);
+  const minutes = Math.floor((diffInSeconds % 3600) / 60);
+  const seconds = diffInSeconds % 60;
 
   const cigarettesAvoided = Math.floor((diffInSeconds / (24 * 3600)) * userData.cigarettesPerDay);
   const moneySaved = ((cigarettesAvoided / userData.cigarettesPerPack) * userData.pricePerPack).toFixed(2);
@@ -61,110 +65,156 @@ export function HomeTab({ userData, diffInSeconds, language, onLogCraving }: Pro
 
   // RPG Leveling System
   const calculateLevel = (seconds: number) => {
-    const days = seconds / (24 * 3600);
-    if (days < 1) return { level: 1, title: isAr ? 'مبتدئ' : 'Novice', next: 1, progress: days * 100 };
-    if (days < 7) return { level: 2, title: isAr ? 'متدرب' : 'Apprenti', next: 7, progress: (days / 7) * 100 };
-    if (days < 30) return { level: 3, title: isAr ? 'محارب' : 'Guerrier', next: 30, progress: (days / 30) * 100 };
-    if (days < 90) return { level: 4, title: isAr ? 'بطل' : 'Héros', next: 90, progress: (days / 90) * 100 };
-    if (days < 365) return { level: 5, title: isAr ? 'أسطورة' : 'Légende', next: 365, progress: (days / 365) * 100 };
-    return { level: 6, title: isAr ? 'معلم' : 'Maître', next: days + 1, progress: 100 };
+    const d = seconds / (24 * 3600);
+    if (d < 1) return { level: 1, title: isAr ? 'مبتدئ' : 'Novice', next: 1, progress: d * 100 };
+    if (d < 7) return { level: 2, title: isAr ? 'متدرب' : 'Apprenti', next: 7, progress: (d / 7) * 100 };
+    if (d < 30) return { level: 3, title: isAr ? 'محارب' : 'Guerrier', next: 30, progress: (d / 30) * 100 };
+    if (d < 90) return { level: 4, title: isAr ? 'بطل' : 'Héros', next: 90, progress: (d / 90) * 100 };
+    if (d < 365) return { level: 5, title: isAr ? 'أسطورة' : 'Légende', next: 365, progress: (d / 365) * 100 };
+    return { level: 6, title: isAr ? 'معلم' : 'Maître', next: d + 1, progress: 100 };
   };
 
   const rpgStats = calculateLevel(diffInSeconds);
 
-  const [selectedTrigger, setSelectedTrigger] = useState('');
-
-  const handleLogCraving = () => {
-    onLogCraving({
-      id: Date.now().toString(),
-      timestamp: new Date().toISOString(),
-      intensity: cravingIntensity,
-      trigger: selectedTrigger,
-      mood: ''
-    });
-    alert(isAr ? `تم تسجيل الرغبة بشدة ${cravingIntensity}` : `Envie enregistrée avec intensité ${cravingIntensity}`);
-    setShowCravingModal(false);
-    setCravingIntensity(5);
-    setSelectedTrigger('');
-  };
-
-  const triggers = [
-    { id: 'stress', label: isAr ? 'توتر' : 'Stress', emoji: '😫' },
-    { id: 'coffee', label: isAr ? 'قهوة' : 'Café', emoji: '☕' },
-    { id: 'social', label: isAr ? 'اجتماعي' : 'Social', emoji: '👥' },
-    { id: 'boredom', label: isAr ? 'ملل' : 'Ennui', emoji: '🥱' },
-    { id: 'alcohol', label: isAr ? 'كحول' : 'Alcool', emoji: '🍷' },
-  ];
+  // Calculate progress for the circular timer (e.g., progress towards next day)
+  const progressPercentage = ((diffInSeconds % (24 * 3600)) / (24 * 3600)) * 100;
+  const strokeDasharray = 2 * Math.PI * 120; // radius 120
+  const strokeDashoffset = strokeDasharray - (progressPercentage / 100) * strokeDasharray;
 
   return (
-    <>
+    <div className="space-y-6 pb-8">
+      {/* Hero Section: SmokeFreeTimer */}
+      <div className="relative flex flex-col items-center justify-center py-8">
+        <div className="relative w-72 h-72 flex items-center justify-center">
+          {/* Background Glow */}
+          <div className="absolute inset-0 rounded-full bg-emerald-500/10 blur-3xl"></div>
+          
+          {/* SVG Circular Progress */}
+          <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 260 260">
+            <defs>
+              <linearGradient id="emeraldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#059669" />
+                <stop offset="100%" stopColor="#34D399" />
+              </linearGradient>
+            </defs>
+            {/* Background Track */}
+            <circle 
+              cx="130" cy="130" r="120" 
+              fill="none" 
+              stroke="rgba(255,255,255,0.05)" 
+              strokeWidth="8" 
+            />
+            {/* Progress Track */}
+            <motion.circle 
+              cx="130" cy="130" r="120" 
+              fill="none" 
+              stroke="url(#emeraldGradient)" 
+              strokeWidth="8" 
+              strokeLinecap="round"
+              initial={{ strokeDashoffset: strokeDasharray }}
+              animate={{ strokeDashoffset }}
+              transition={{ duration: 1, ease: "easeOut" }}
+              style={{ strokeDasharray }}
+            />
+          </svg>
+
+          {/* Timer Content */}
+          <div className="relative z-10 flex flex-col items-center text-center">
+            <span className="text-6xl font-bold font-mono text-white emerald-text-glow tracking-tighter">
+              {days}
+            </span>
+            <span className="text-sm text-emerald-400 font-medium tracking-widest uppercase mt-1">
+              {isAr ? 'أيام بدون تدخين' : 'Jours sans fumer'}
+            </span>
+            <div className="flex items-center gap-2 mt-4 text-slate-300 font-mono text-lg">
+              <span>{hours.toString().padStart(2, '0')}</span>:
+              <span>{minutes.toString().padStart(2, '0')}</span>:
+              <span className="text-emerald-400">{seconds.toString().padStart(2, '0')}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Subtitle with pulsing dot */}
+        <div className="mt-6 flex items-center gap-2 text-sm text-slate-400 bg-slate-800/50 px-4 py-2 rounded-full border border-white/5">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          {isAr ? 'رئتيك تتعافى الآن' : 'Your lungs are healing'}
+        </div>
+      </div>
+
+      {/* Stats Grid */}
       <div className="grid grid-cols-2 gap-4">
-        <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col items-center text-center transition-colors">
-          <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center mb-3">
+        <motion.div whileHover={{ scale: 1.02 }} className="glass-panel p-5 rounded-3xl flex flex-col items-center text-center relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-b from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+          <div className="w-12 h-12 bg-emerald-500/10 text-emerald-400 rounded-full flex items-center justify-center mb-3 group-hover:emerald-glow transition-all">
             <DollarSign size={24} />
           </div>
-          <span className="text-2xl font-bold text-slate-800 dark:text-white">{moneySaved}</span>
-          <span className="text-sm text-slate-500 dark:text-slate-400 font-medium">
+          <span className="text-2xl font-bold text-white font-mono">{moneySaved}</span>
+          <span className="text-xs text-slate-400 font-medium mt-1">
             {userData.currency} {isAr ? 'تم توفيرها' : 'économisés'}
           </span>
-        </div>
+        </motion.div>
         
-        <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col items-center text-center transition-colors">
-          <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center mb-3">
+        <motion.div whileHover={{ scale: 1.02 }} className="glass-panel p-5 rounded-3xl flex flex-col items-center text-center relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-b from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+          <div className="w-12 h-12 bg-emerald-500/10 text-emerald-400 rounded-full flex items-center justify-center mb-3 group-hover:emerald-glow transition-all">
             <CigaretteOff size={24} />
           </div>
-          <span className="text-2xl font-bold text-slate-800 dark:text-white">
+          <span className="text-2xl font-bold text-white font-mono">
             <AnimatedCounter value={cigarettesAvoided} />
           </span>
-          <span className="text-sm text-slate-500 dark:text-slate-400 font-medium">
+          <span className="text-xs text-slate-400 font-medium mt-1">
             {isAr ? 'سيجارة تم تجنبها' : 'cigarettes évitées'}
           </span>
-        </div>
+        </motion.div>
       </div>
 
-      <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-100 dark:border-slate-800 flex items-center gap-4 transition-colors">
-        <div className="w-14 h-14 bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400 rounded-full flex items-center justify-center shrink-0">
-          <Clock size={28} />
+      {/* Life Regained */}
+      <motion.div whileHover={{ scale: 1.02 }} className="glass-panel p-5 rounded-3xl flex items-center gap-4 relative overflow-hidden group">
+        <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+        <div className="w-14 h-14 bg-emerald-500/10 text-emerald-400 rounded-full flex items-center justify-center shrink-0 group-hover:emerald-glow transition-all">
+          <Activity size={28} />
         </div>
         <div>
-          <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400 mb-1">
+          <h3 className="text-xs font-semibold text-slate-400 mb-1 uppercase tracking-wider">
             {isAr ? 'الوقت المسترد للحياة' : 'Temps de vie regagné'}
           </h3>
-          <p className="text-lg font-bold text-slate-800 dark:text-white">
-            {lifeRegainedDays > 0 ? `${lifeRegainedDays} ${isAr ? 'يوم و' : 'jours et'} ` : ''}
-            {lifeRegainedHours} {isAr ? 'ساعة' : 'heures'}
+          <p className="text-xl font-bold text-white">
+            {lifeRegainedDays > 0 ? `${lifeRegainedDays} ${isAr ? 'يوم و' : 'j et'} ` : ''}
+            {lifeRegainedHours} {isAr ? 'ساعة' : 'h'}
           </p>
         </div>
-      </div>
+      </motion.div>
 
       {/* RPG Leveling System */}
-      <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-100 dark:border-slate-800 transition-colors">
-        <div className="flex justify-between items-end mb-2">
+      <div className="glass-panel p-5 rounded-3xl">
+        <div className="flex justify-between items-end mb-3">
           <div>
-            <span className="text-xs font-bold text-amber-500 uppercase tracking-wider">
+            <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">
               {isAr ? 'المستوى' : 'Niveau'} {rpgStats.level}
             </span>
-            <h3 className="font-bold text-slate-800 dark:text-white text-lg">
+            <h3 className="font-bold text-white text-lg mt-1">
               {rpgStats.title}
             </h3>
           </div>
-          <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-            {isAr ? 'الهدف القادم:' : 'Prochain:'} {rpgStats.next} {isAr ? 'يوم' : 'jours'}
+          <span className="text-xs text-slate-400 font-medium">
+            {isAr ? 'الهدف القادم:' : 'Prochain:'} <span className="text-white font-mono">{rpgStats.next}</span> {isAr ? 'يوم' : 'j'}
           </span>
         </div>
-        <div className="h-3 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-          <div 
-            className="h-full rounded-full transition-all duration-1000 bg-gradient-to-r from-amber-400 to-amber-600"
-            style={{ width: `${Math.min(100, rpgStats.progress)}%` }}
+        <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden border border-white/5">
+          <motion.div 
+            className="h-full rounded-full bg-gradient-to-r from-emerald-600 to-emerald-400 emerald-glow"
+            initial={{ width: 0 }}
+            animate={{ width: `${Math.min(100, rpgStats.progress)}%` }}
+            transition={{ duration: 1, ease: "easeOut" }}
           />
         </div>
       </div>
 
       {/* Badges Section */}
-      <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-100 dark:border-slate-800 transition-colors">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="font-bold text-slate-800 dark:text-white flex items-center gap-2">
-            <Award className="text-amber-500" size={20} />
+      <div className="glass-panel p-5 rounded-3xl">
+        <div className="flex justify-between items-center mb-5">
+          <h3 className="font-bold text-white flex items-center gap-2">
+            <Award className="text-emerald-400" size={20} />
             {isAr ? 'الإنجازات' : 'Réalisations'}
           </h3>
           <button 
@@ -172,7 +222,8 @@ export function HomeTab({ userData, diffInSeconds, language, onLogCraving }: Pro
               confetti({
                 particleCount: 100,
                 spread: 70,
-                origin: { y: 0.6 }
+                origin: { y: 0.6 },
+                colors: ['#10B981', '#34D399', '#059669']
               });
               const text = isAr 
                 ? `أنا فخور بأنني لم أدخن منذ ${diffInSeconds >= 24 * 3600 ? Math.floor(diffInSeconds / (24 * 3600)) + ' يوم' : Math.floor(diffInSeconds / 3600) + ' ساعة'}! 🎉`
@@ -183,176 +234,44 @@ export function HomeTab({ userData, diffInSeconds, language, onLogCraving }: Pro
                 alert(text);
               }
             }}
-            className="text-xs bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 px-3 py-1.5 rounded-full font-bold"
+            className="text-[10px] bg-emerald-500/20 text-emerald-400 px-3 py-1.5 rounded-full font-bold border border-emerald-500/30 hover:bg-emerald-500/30 transition-colors uppercase tracking-wider"
           >
             {isAr ? 'مشاركة' : 'Partager'}
           </button>
         </div>
-        <div className="flex gap-4 overflow-x-auto pb-2 snap-x">
-          {badges.map(badge => (
-            <div key={badge.id} className="flex flex-col items-center gap-2 min-w-[60px] snap-center">
-              <div className={`w-12 h-12 rounded-full flex items-center justify-center ${badge.achieved ? 'bg-amber-100 dark:bg-amber-900/50 text-amber-500' : 'bg-slate-100 dark:bg-slate-800 text-slate-300 dark:text-slate-600'}`}>
+        <div className="flex gap-4 overflow-x-auto pb-2 snap-x hide-scrollbar">
+          {badges.map((badge, idx) => (
+            <motion.div 
+              key={badge.id} 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: idx * 0.1 }}
+              className="flex flex-col items-center gap-3 min-w-[70px] snap-center"
+            >
+              <div className={`w-14 h-14 rounded-full flex items-center justify-center relative ${badge.achieved ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/50 emerald-glow' : 'bg-slate-800/50 text-slate-600 border border-white/5 opacity-50 grayscale'}`}>
                 <Award size={24} />
+                {badge.achieved && (
+                  <div className="absolute inset-0 rounded-full border border-emerald-400 animate-ping opacity-20"></div>
+                )}
               </div>
-              <span className={`text-[10px] font-bold text-center ${badge.achieved ? 'text-slate-700 dark:text-slate-300' : 'text-slate-400 dark:text-slate-500'}`}>
+              <span className={`text-[10px] font-bold text-center uppercase tracking-wider ${badge.achieved ? 'text-slate-300' : 'text-slate-600'}`}>
                 {badge.label}
               </span>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>
 
-      {/* Craving Logger Button */}
-      <button 
-        onClick={() => setShowCravingModal(true)}
-        className="w-full bg-rose-50 dark:bg-rose-900/20 hover:bg-rose-100 dark:hover:bg-rose-900/40 text-rose-600 dark:text-rose-400 font-bold py-4 rounded-3xl transition-colors flex items-center justify-center gap-2 border border-rose-100 dark:border-rose-900/50"
-      >
-        <PlusCircle size={20} />
-        {isAr ? 'تسجيل رغبة ملحة (Craving)' : 'Enregistrer une envie (Craving)'}
-      </button>
-
-      {/* Craving Modal */}
-      {showCravingModal && (
-        <div className="fixed inset-0 bg-black/50 z-[60] flex items-center justify-center p-6 backdrop-blur-sm">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 w-full max-w-sm shadow-2xl">
-            <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-4 text-center">
-              {isAr ? 'ما مدى شدة الرغبة؟' : "Quelle est l'intensité de l'envie ?"}
-            </h3>
-            <div className="flex justify-between items-center mb-6">
-              <span className="text-emerald-500 font-bold">1</span>
-              <input 
-                type="range" 
-                min="1" 
-                max="10" 
-                value={cravingIntensity} 
-                onChange={(e) => setCravingIntensity(Number(e.target.value))}
-                className="w-2/3 accent-rose-500"
-              />
-              <span className="text-rose-500 font-bold">10</span>
-            </div>
-            <div className="text-center text-3xl font-bold text-rose-500 mb-6">
-              {cravingIntensity}
-            </div>
-            
-            <div className="mb-6">
-              <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3 text-center">
-                {isAr ? 'ما هو المحفز؟' : 'Quel est le déclencheur ?'}
-              </h4>
-              <div className="flex flex-wrap justify-center gap-2">
-                {triggers.map(trigger => (
-                  <button
-                    key={trigger.id}
-                    onClick={() => setSelectedTrigger(trigger.id)}
-                    className={`px-3 py-2 rounded-xl text-sm font-medium transition-colors flex items-center gap-1 ${
-                      selectedTrigger === trigger.id 
-                        ? 'bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-400 border-2 border-rose-500' 
-                        : 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-2 border-transparent'
-                    }`}
-                  >
-                    <span>{trigger.emoji}</span>
-                    <span>{trigger.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="flex gap-3">
-              <button 
-                onClick={() => setShowCravingModal(false)}
-                className="flex-1 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 py-3 rounded-xl font-bold"
-              >
-                {isAr ? 'إلغاء' : 'Annuler'}
-              </button>
-              <button 
-                onClick={handleLogCraving}
-                className="flex-1 bg-rose-500 text-white py-3 rounded-xl font-bold shadow-lg shadow-rose-500/30"
-              >
-                {isAr ? 'حفظ' : 'Enregistrer'}
-              </button>
-            </div>
-          </div>
+      {/* Quote */}
+      <div className="glass-panel p-6 rounded-3xl text-center relative overflow-hidden">
+        <div className="absolute -top-4 -left-4 text-emerald-500/10 rotate-12">
+          <Lightbulb size={80} />
         </div>
-      )}
-
-      {/* Mood Tracker */}
-      <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-100 dark:border-slate-800 transition-colors">
-        <h3 className="font-bold text-slate-800 dark:text-white mb-4 text-center">
-          {isAr ? 'كيف تشعر اليوم؟' : "Comment vous sentez-vous aujourd'hui ?"}
-        </h3>
-        <div className="flex justify-between px-2">
-          {[
-            { emoji: '😢', label: isAr ? 'حزين' : 'Triste', value: 'sad' },
-            { emoji: '😠', label: isAr ? 'غاضب' : 'En colère', value: 'angry' },
-            { emoji: '😐', label: isAr ? 'عادي' : 'Neutre', value: 'neutral' },
-            { emoji: '🙂', label: isAr ? 'جيد' : 'Bien', value: 'good' },
-            { emoji: '🤩', label: isAr ? 'ممتاز' : 'Super', value: 'great' }
-          ].map(mood => (
-            <button 
-              key={mood.value}
-              onClick={() => alert(isAr ? `تم تسجيل مزاجك: ${mood.label}` : `Humeur enregistrée : ${mood.label}`)}
-              className="flex flex-col items-center gap-2 hover:scale-110 transition-transform"
-            >
-              <span className="text-3xl">{mood.emoji}</span>
-              <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400">{mood.label}</span>
-            </button>
-          ))}
-        </div>
+        <p className="text-sm font-medium text-slate-300 italic relative z-10 leading-relaxed">
+          "{quoteOfDay}"
+        </p>
       </div>
 
-      {userData.savingsGoal && (
-        <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-100 dark:border-slate-800 transition-colors">
-          <div className="flex justify-between items-center mb-3">
-            <div className="flex items-center gap-2">
-              <Target className="text-amber-500" size={20} />
-              <h3 className="font-bold text-slate-800 dark:text-white">{userData.savingsGoal.name}</h3>
-            </div>
-            <span className="text-sm font-bold text-slate-500 dark:text-slate-400">
-              {moneySaved} / {userData.savingsGoal.amount} {userData.currency}
-            </span>
-          </div>
-          <div className="h-2.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-            <div 
-              className="h-full rounded-full transition-all duration-1000 bg-amber-500"
-              style={{ width: `${Math.min(100, (Number(moneySaved) / userData.savingsGoal.amount) * 100)}%` }}
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Investment Projection */}
-      <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-100 dark:border-slate-800 transition-colors">
-        <h3 className="font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
-          <TrendingUp className="text-blue-500" size={20} />
-          {isAr ? 'توقعات التوفير' : 'Prévisions d\'économies'}
-        </h3>
-        <div className="grid grid-cols-3 gap-2">
-          {[
-            { label: isAr ? 'سنة' : '1 an', multiplier: 365 },
-            { label: isAr ? '5 سنوات' : '5 ans', multiplier: 365 * 5 },
-            { label: isAr ? '10 سنوات' : '10 ans', multiplier: 365 * 10 }
-          ].map((period, idx) => {
-            const projectedSavings = ((userData.cigarettesPerDay / userData.cigarettesPerPack) * userData.pricePerPack * period.multiplier).toFixed(0);
-            return (
-              <div key={idx} className="bg-slate-50 dark:bg-slate-800 p-3 rounded-2xl text-center">
-                <div className="text-xs text-slate-500 dark:text-slate-400 mb-1">{period.label}</div>
-                <div className="font-bold text-emerald-600 dark:text-emerald-400 text-sm">
-                  {projectedSavings} {userData.currency}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      <div className="bg-gradient-to-br from-emerald-500 to-teal-600 dark:from-emerald-600 dark:to-teal-800 rounded-3xl p-6 text-white shadow-md transition-colors">
-        <div className="flex items-start gap-3">
-          <Lightbulb className="shrink-0 text-emerald-200" size={24} />
-          <div>
-            <h3 className="font-bold mb-1">{isAr ? 'إلهام اليوم' : 'Inspiration du jour'}</h3>
-            <p className="text-emerald-50 text-sm leading-relaxed">{quoteOfDay}</p>
-          </div>
-        </div>
-      </div>
-    </>
+    </div>
   );
 }

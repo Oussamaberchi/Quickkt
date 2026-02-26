@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Bot } from 'lucide-react';
+import { Send, Bot, Sparkles } from 'lucide-react';
 import { ChatMessage } from '../types';
 import { GoogleGenAI } from '@google/genai';
+import { motion } from 'framer-motion';
 
 interface Props {
   chatHistory: ChatMessage[];
@@ -38,10 +39,8 @@ export function AICoachTab({ chatHistory, onSendMessage, language }: Props) {
     setIsLoading(true);
 
     try {
-      // @ts-ignore
       const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY });
       
-      // Format history for Gemini
       const contents = chatHistory.map(msg => ({
         role: msg.role,
         parts: [{ text: msg.text }]
@@ -81,60 +80,82 @@ export function AICoachTab({ chatHistory, onSendMessage, language }: Props) {
   };
 
   return (
-    <div className="flex flex-col h-[65vh] bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden transition-colors">
-      <div className="p-4 border-b border-slate-100 dark:border-slate-800 bg-emerald-50 dark:bg-emerald-900/20 flex items-center gap-3">
-        <div className="w-10 h-10 bg-emerald-100 dark:bg-emerald-800 rounded-full flex items-center justify-center text-emerald-600 dark:text-emerald-300">
-          <Bot size={24} />
+    <div className="flex flex-col h-[70vh] glass-panel rounded-3xl overflow-hidden relative">
+      {/* Header */}
+      <div className="p-4 border-b border-white/5 bg-slate-800/50 flex items-center gap-4 relative z-10">
+        <div className="relative">
+          <div className="absolute inset-0 bg-emerald-500 rounded-full blur-md opacity-50 animate-pulse"></div>
+          <div className="w-12 h-12 bg-slate-900 border border-emerald-500/30 rounded-full flex items-center justify-center text-emerald-400 relative z-10">
+            <Bot size={24} />
+          </div>
+          <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-slate-900 flex items-center justify-center">
+            <Sparkles size={8} className="text-white" />
+          </div>
         </div>
         <div>
-          <h2 className="font-bold text-slate-800 dark:text-white">{isAr ? 'المدرب الذكي' : 'Coach IA'}</h2>
-          <p className="text-xs text-slate-500 dark:text-slate-400">{isAr ? 'متواجد دائماً لدعمك' : 'Toujours là pour vous soutenir'}</p>
+          <h2 className="font-bold text-white text-lg">{isAr ? 'المدرب الذكي' : 'Coach IA'}</h2>
+          <p className="text-xs text-emerald-400 font-medium uppercase tracking-wider">{isAr ? 'متصل الآن' : 'En ligne'}</p>
         </div>
       </div>
       
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      {/* Chat Area */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-6 relative z-10 hide-scrollbar">
         {chatHistory.length === 0 && (
-          <div className="text-center text-slate-500 dark:text-slate-400 mt-10 text-sm">
-            {isAr ? 'مرحباً! أنا مدربك الذكي. كيف يمكنني مساعدتك اليوم في رحلة إقلاعك؟' : "Bonjour ! Je suis votre coach IA. Comment puis-je vous aider aujourd'hui dans votre démarche d'arrêt ?"}
+          <div className="flex flex-col items-center justify-center h-full text-center opacity-50">
+            <Bot size={48} className="text-slate-500 mb-4" />
+            <p className="text-slate-400 text-sm max-w-[80%]">
+              {isAr ? 'مرحباً! أنا مدربك الذكي. كيف يمكنني مساعدتك اليوم في رحلة إقلاعك؟' : "Bonjour ! Je suis votre coach IA. Comment puis-je vous aider aujourd'hui dans votre démarche d'arrêt ?"}
+            </p>
           </div>
         )}
-        {chatHistory.map((msg) => (
-          <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[80%] rounded-2xl p-3 text-sm ${
+        
+        {chatHistory.map((msg, idx) => (
+          <motion.div 
+            key={msg.id} 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+          >
+            <div className={`max-w-[85%] rounded-2xl p-4 text-sm leading-relaxed shadow-sm ${
               msg.role === 'user' 
-                ? 'bg-emerald-500 text-white rounded-tr-none' 
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-tl-none'
+                ? 'bg-emerald-600 text-white rounded-tr-sm' 
+                : 'bg-slate-800 border border-white/5 text-slate-200 rounded-tl-sm'
             }`}>
               {msg.text}
             </div>
-          </div>
+          </motion.div>
         ))}
+        
         {isLoading && (
           <div className="flex justify-start">
-            <div className="bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-2xl rounded-tl-none p-3 text-sm flex gap-1">
-              <span className="animate-bounce">.</span><span className="animate-bounce delay-100">.</span><span className="animate-bounce delay-200">.</span>
+            <div className="bg-slate-800 border border-white/5 text-emerald-400 rounded-2xl rounded-tl-sm p-4 text-sm flex gap-1 items-center h-12">
+              <span className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+              <span className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+              <span className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
             </div>
           </div>
         )}
-        <div ref={messagesEndRef} />
+        <div ref={messagesEndRef} className="h-4" />
       </div>
 
-      <div className="p-4 border-t border-slate-100 dark:border-slate-800">
-        <div className="flex gap-2">
+      {/* Input Area */}
+      <div className="p-4 border-t border-white/5 bg-slate-800/80 backdrop-blur-md relative z-10">
+        <div className="flex gap-3">
           <input 
             type="text" 
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleSend()}
             placeholder={isAr ? 'اكتب رسالتك هنا...' : 'Écrivez votre message ici...'}
-            className="flex-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-emerald-500 dark:text-white transition-colors"
+            className="flex-1 bg-slate-900/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition-all placeholder:text-slate-500"
           />
           <button 
             onClick={handleSend}
             disabled={isLoading || !input.trim()}
-            className="bg-emerald-500 text-white p-3 rounded-xl disabled:opacity-50 transition-opacity"
+            className="bg-emerald-500 hover:bg-emerald-400 text-white p-3 rounded-xl disabled:opacity-50 disabled:hover:bg-emerald-500 transition-colors flex items-center justify-center w-12 shrink-0 shadow-[0_0_15px_rgba(16,185,129,0.3)] disabled:shadow-none"
           >
-            <Send size={18} className={isAr ? 'rotate-180' : ''} />
+            <Send size={20} className={isAr ? 'rotate-180' : ''} />
           </button>
         </div>
       </div>

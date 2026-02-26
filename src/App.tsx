@@ -8,7 +8,7 @@ export default function App() {
     userData: null,
     cravings: [],
     chatHistory: [],
-    theme: 'light',
+    theme: 'dark', // Force dark mode
     language: 'ar'
   });
   const [isLoaded, setIsLoaded] = useState(false);
@@ -20,7 +20,7 @@ export default function App() {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        setAppState(prev => ({ ...prev, ...parsed }));
+        setAppState(prev => ({ ...prev, ...parsed, theme: 'dark' })); // Always dark
       } catch (e) {
         console.error('Failed to parse saved data');
       }
@@ -38,12 +38,8 @@ export default function App() {
     if (isLoaded) {
       localStorage.setItem('quitSmokingState', JSON.stringify(appState));
       
-      // Apply theme
-      if (appState.theme === 'dark') {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-      }
+      // Force dark mode
+      document.documentElement.classList.add('dark');
 
       // Apply language direction
       document.documentElement.dir = appState.language === 'ar' ? 'rtl' : 'ltr';
@@ -64,10 +60,6 @@ export default function App() {
     if (window.confirm(message)) {
       setAppState(prev => ({ ...prev, userData: null, cravings: [], chatHistory: [] }));
     }
-  };
-
-  const toggleTheme = () => {
-    setAppState(prev => ({ ...prev, theme: prev.theme === 'light' ? 'dark' : 'light' }));
   };
 
   const toggleLanguage = () => {
@@ -105,13 +97,13 @@ export default function App() {
     <Dashboard 
       userData={appState.userData} 
       now={now} 
-      theme={appState.theme}
+      theme="dark"
       language={appState.language}
       chatHistory={appState.chatHistory || []}
       cravings={appState.cravings || []}
       onOpenSettings={() => setShowSettings(true)} 
       onReset={handleReset}
-      onToggleTheme={toggleTheme}
+      onToggleTheme={() => {}} // No-op
       onToggleLanguage={toggleLanguage}
       onSendMessage={handleSendMessage}
       onLogCraving={handleLogCraving}
