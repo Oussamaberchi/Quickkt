@@ -31,4 +31,5 @@ export interface AppState {
   chatHistory: ChatMessage[];
   theme: 'light' | 'dark';
   language: 'ar' | 'fr';
+  breathingSessions?: number;
 }

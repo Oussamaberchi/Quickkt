@@ -14,23 +14,23 @@ export const HEALTH_MILESTONES = [
 ];
 
 export const MOTIVATIONAL_QUOTES = [
-  "كل رغبة في التدخين تستمر لبضع دقائق فقط، يمكنك تجاوزها!",
-  "أنت أقوى من أي عادة.",
-  "كل يوم بدون تدخين هو انتصار لصحتك.",
-  "جسدك يشكرك الآن على كل لحظة تقضيها بدون تدخين.",
-  "تذكر لماذا بدأت هذه الرحلة.",
-  "الرغبة الملحة ستمر، سواء دخنت أم لا. اختر ألا تدخن.",
-  "الاستثمار في صحتك هو أفضل استثمار ستقوم به على الإطلاق."
+  "أنا غير مدخن. هذا هو قراري. أنا حر.",
+  "السيجارة لا تعطيني شيئاً، بل تسرق مني كل شيء.",
+  "كل رغبة تستمر 3 دقائق فقط. اشتغل على أي شيء 3 دقائق، ستختفي.",
+  "أنا لا أحاول الإقلاع، أنا غير مدخن.",
+  "الاستثمار في صحتك هو أفضل استثمار ستقوم به على الإطلاق.",
+  "حتى سحبة واحدة ترجعك للبداية. لا سيجارة واحدة أبداً.",
+  "الرغبة الملحة ستمر، سواء دخنت أم لا. اختر ألا تدخن."
 ];
 
 export const MOTIVATIONAL_QUOTES_FR = [
-  "Chaque envie de fumer ne dure que quelques minutes, vous pouvez la surmonter !",
-  "Vous êtes plus fort que n'importe quelle habitude.",
-  "Chaque jour sans fumer est une victoire pour votre santé.",
-  "Votre corps vous remercie maintenant pour chaque instant passé sans fumer.",
-  "Rappelez-vous pourquoi vous avez commencé ce voyage.",
-  "L'envie passera, que vous fumiez ou non. Choisissez de ne pas fumer.",
-  "Investir dans votre santé est le meilleur investissement que vous ferez jamais."
+  "Je suis non-fumeur. C'est ma décision. Je suis libre.",
+  "La cigarette ne me donne rien, elle me vole tout.",
+  "Chaque envie ne dure que 3 minutes. Occupez-vous pendant 3 minutes, elle disparaîtra.",
+  "Je n'essaie pas d'arrêter, je suis non-fumeur.",
+  "Investir dans votre santé est le meilleur investissement que vous ferez jamais.",
+  "Même une seule bouffée vous ramène au début. Pas une seule cigarette, jamais.",
+  "L'envie passera, que vous fumiez ou non. Choisissez de ne pas fumer."
 ];
 
 export const CRAVING_TIPS = [

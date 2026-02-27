@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Settings, Trash2, Home, Heart, MessageCircleHeart, Wind, Moon, Sun, Globe, Bot, BarChart2, Activity, Plus } from 'lucide-react';
+import { Settings, Trash2, Home, Heart, MessageCircleHeart, Wind, Moon, Sun, Globe, Bot, BarChart2, Activity, Plus, ShieldCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { UserData, ChatMessage, CravingLog } from '../types';
 import { HomeTab } from './HomeTab';
@@ -16,17 +16,19 @@ interface Props {
   language: 'ar' | 'fr';
   chatHistory: ChatMessage[];
   cravings: CravingLog[];
+  breathingSessions: number;
   onOpenSettings: () => void;
   onReset: () => void;
   onToggleTheme: () => void;
   onToggleLanguage: () => void;
   onSendMessage: (msg: ChatMessage) => void;
   onLogCraving: (craving: CravingLog) => void;
+  onLogBreathingSession: () => void;
 }
 
 export function Dashboard({ 
-  userData, now, theme, language, chatHistory, cravings,
-  onOpenSettings, onReset, onToggleTheme, onToggleLanguage, onSendMessage, onLogCraving
+  userData, now, theme, language, chatHistory, cravings, breathingSessions,
+  onOpenSettings, onReset, onToggleTheme, onToggleLanguage, onSendMessage, onLogCraving, onLogBreathingSession
 }: Props) {
   const [activeTab, setActiveTab] = useState<'home' | 'health' | 'support' | 'coach' | 'analytics' | 'exercise'>('home');
   const [showCravingModal, setShowCravingModal] = useState(false);
@@ -106,7 +108,7 @@ export function Dashboard({
             {activeTab === 'support' && <SupportTab language={language} />}
             {activeTab === 'coach' && <AICoachTab chatHistory={chatHistory} onSendMessage={onSendMessage} language={language} />}
             {activeTab === 'analytics' && <AnalyticsTab cravings={cravings} language={language} />}
-            {activeTab === 'exercise' && <ExerciseTab language={language} />}
+            {activeTab === 'exercise' && <ExerciseTab language={language} sessionsCompleted={breathingSessions} onSessionComplete={onLogBreathingSession} />}
           </motion.div>
         </AnimatePresence>
 
@@ -128,21 +130,21 @@ export function Dashboard({
       <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-3rem)] max-w-[400px] glass-panel rounded-full px-2 py-3 flex justify-around items-center z-50">
         <button 
           onClick={() => setActiveTab('home')}
-          className={`relative flex flex-col items-center gap-1 transition-all duration-300 w-14 ${activeTab === 'home' ? 'text-emerald-400 -translate-y-1' : 'text-slate-400 hover:text-slate-300'}`}
+          className={`relative flex flex-col items-center gap-1 transition-all duration-300 w-12 ${activeTab === 'home' ? 'text-emerald-400 -translate-y-1' : 'text-slate-400 hover:text-slate-300'}`}
         >
           <Home size={22} strokeWidth={activeTab === 'home' ? 2.5 : 2} />
           {activeTab === 'home' && <span className="absolute -bottom-2 w-1 h-1 bg-emerald-400 rounded-full" />}
         </button>
         <button 
           onClick={() => setActiveTab('health')}
-          className={`relative flex flex-col items-center gap-1 transition-all duration-300 w-14 ${activeTab === 'health' ? 'text-emerald-400 -translate-y-1' : 'text-slate-400 hover:text-slate-300'}`}
+          className={`relative flex flex-col items-center gap-1 transition-all duration-300 w-12 ${activeTab === 'health' ? 'text-emerald-400 -translate-y-1' : 'text-slate-400 hover:text-slate-300'}`}
         >
           <Heart size={22} strokeWidth={activeTab === 'health' ? 2.5 : 2} />
           {activeTab === 'health' && <span className="absolute -bottom-2 w-1 h-1 bg-emerald-400 rounded-full" />}
         </button>
         
         {/* Center Add Button */}
-        <div className="relative -top-6">
+        <div className="relative -top-6 mx-2">
           <button 
             onClick={() => setShowCravingModal(true)}
             className="w-14 h-14 bg-gradient-to-tr from-emerald-600 to-emerald-400 rounded-full flex items-center justify-center text-white emerald-glow hover:scale-105 transition-transform"
@@ -152,18 +154,18 @@ export function Dashboard({
         </div>
 
         <button 
-          onClick={() => setActiveTab('coach')}
-          className={`relative flex flex-col items-center gap-1 transition-all duration-300 w-14 ${activeTab === 'coach' ? 'text-emerald-400 -translate-y-1' : 'text-slate-400 hover:text-slate-300'}`}
+          onClick={() => setActiveTab('support')}
+          className={`relative flex flex-col items-center gap-1 transition-all duration-300 w-12 ${activeTab === 'support' ? 'text-emerald-400 -translate-y-1' : 'text-slate-400 hover:text-slate-300'}`}
         >
-          <Bot size={22} strokeWidth={activeTab === 'coach' ? 2.5 : 2} />
-          {activeTab === 'coach' && <span className="absolute -bottom-2 w-1 h-1 bg-emerald-400 rounded-full" />}
+          <ShieldCheck size={22} strokeWidth={activeTab === 'support' ? 2.5 : 2} />
+          {activeTab === 'support' && <span className="absolute -bottom-2 w-1 h-1 bg-emerald-400 rounded-full" />}
         </button>
         <button 
-          onClick={() => setActiveTab('analytics')}
-          className={`relative flex flex-col items-center gap-1 transition-all duration-300 w-14 ${activeTab === 'analytics' ? 'text-emerald-400 -translate-y-1' : 'text-slate-400 hover:text-slate-300'}`}
+          onClick={() => setActiveTab('exercise')}
+          className={`relative flex flex-col items-center gap-1 transition-all duration-300 w-12 ${activeTab === 'exercise' ? 'text-emerald-400 -translate-y-1' : 'text-slate-400 hover:text-slate-300'}`}
         >
-          <BarChart2 size={22} strokeWidth={activeTab === 'analytics' ? 2.5 : 2} />
-          {activeTab === 'analytics' && <span className="absolute -bottom-2 w-1 h-1 bg-emerald-400 rounded-full" />}
+          <Wind size={22} strokeWidth={activeTab === 'exercise' ? 2.5 : 2} />
+          {activeTab === 'exercise' && <span className="absolute -bottom-2 w-1 h-1 bg-emerald-400 rounded-full" />}
         </button>
       </div>
 

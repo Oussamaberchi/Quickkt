@@ -80,6 +80,13 @@ export default function App() {
     }));
   };
 
+  const handleLogBreathingSession = React.useCallback(() => {
+    setAppState(prev => ({
+      ...prev,
+      breathingSessions: (prev.breathingSessions || 0) + 1
+    }));
+  }, []);
+
   if (!isLoaded) return null;
 
   if (!appState.userData || showSettings) {
@@ -101,12 +108,14 @@ export default function App() {
       language={appState.language}
       chatHistory={appState.chatHistory || []}
       cravings={appState.cravings || []}
+      breathingSessions={appState.breathingSessions || 0}
       onOpenSettings={() => setShowSettings(true)} 
       onReset={handleReset}
       onToggleTheme={() => {}} // No-op
       onToggleLanguage={toggleLanguage}
       onSendMessage={handleSendMessage}
       onLogCraving={handleLogCraving}
+      onLogBreathingSession={handleLogBreathingSession}
     />
   );
 }

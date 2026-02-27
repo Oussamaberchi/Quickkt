@@ -141,6 +141,27 @@ export function HomeTab({ userData, diffInSeconds, language }: Props) {
         </div>
       </div>
 
+      {/* Next Milestone Countdown */}
+      <div className="glass-panel p-5 rounded-3xl flex items-center justify-between relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl -mr-8 -mt-8"></div>
+        <div>
+          <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">
+            {isAr ? 'الهدف القادم' : 'Prochain objectif'}
+          </h3>
+          <p className="text-white font-bold">
+            {isAr ? `الوصول إلى ${rpgStats.next} أيام` : `Atteindre ${rpgStats.next} jours`}
+          </p>
+        </div>
+        <div className="text-right">
+          <div className="text-xl font-bold text-blue-400 font-mono">
+            {Math.max(0, rpgStats.next - days)} {isAr ? 'أيام' : 'jours'}
+          </div>
+          <p className="text-[10px] text-slate-500 uppercase tracking-wider font-bold">
+            {isAr ? 'متبقية' : 'restants'}
+          </p>
+        </div>
+      </div>
+
       {/* Stats Grid */}
       <div className="grid grid-cols-2 gap-4">
         <motion.div whileHover={{ scale: 1.02 }} className="glass-panel p-5 rounded-3xl flex flex-col items-center text-center relative overflow-hidden group">
