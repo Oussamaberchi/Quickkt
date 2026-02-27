@@ -56,7 +56,7 @@ export function Dashboard({
     { id: 'coffee', label: isAr ? 'قهوة' : 'Café', emoji: '☕' },
     { id: 'social', label: isAr ? 'اجتماعي' : 'Social', emoji: '👥' },
     { id: 'boredom', label: isAr ? 'ملل' : 'Ennui', emoji: '🥱' },
-    { id: 'alcohol', label: isAr ? 'كحول' : 'Alcool', emoji: '🍷' },
+    { id: 'food', label: isAr ? 'بعد الأكل' : 'Après repas', emoji: '🍽️' },
   ];
 
   const quitDate = new Date(userData.quitDate);
@@ -127,45 +127,59 @@ export function Dashboard({
       </div>
 
       {/* Floating Bottom Navigation */}
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-3rem)] max-w-[400px] glass-panel rounded-full px-2 py-3 flex justify-around items-center z-50">
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-1rem)] max-w-[450px] glass-panel rounded-full px-2 py-2 flex justify-between items-center z-50">
         <button 
           onClick={() => setActiveTab('home')}
-          className={`relative flex flex-col items-center gap-1 transition-all duration-300 w-12 ${activeTab === 'home' ? 'text-emerald-400 -translate-y-1' : 'text-slate-400 hover:text-slate-300'}`}
+          className={`relative flex flex-col items-center gap-1 transition-all duration-300 flex-1 ${activeTab === 'home' ? 'text-emerald-400 -translate-y-1' : 'text-slate-400 hover:text-slate-300'}`}
         >
-          <Home size={22} strokeWidth={activeTab === 'home' ? 2.5 : 2} />
+          <Home size={20} strokeWidth={activeTab === 'home' ? 2.5 : 2} />
           {activeTab === 'home' && <span className="absolute -bottom-2 w-1 h-1 bg-emerald-400 rounded-full" />}
         </button>
         <button 
           onClick={() => setActiveTab('health')}
-          className={`relative flex flex-col items-center gap-1 transition-all duration-300 w-12 ${activeTab === 'health' ? 'text-emerald-400 -translate-y-1' : 'text-slate-400 hover:text-slate-300'}`}
+          className={`relative flex flex-col items-center gap-1 transition-all duration-300 flex-1 ${activeTab === 'health' ? 'text-emerald-400 -translate-y-1' : 'text-slate-400 hover:text-slate-300'}`}
         >
-          <Heart size={22} strokeWidth={activeTab === 'health' ? 2.5 : 2} />
+          <Heart size={20} strokeWidth={activeTab === 'health' ? 2.5 : 2} />
           {activeTab === 'health' && <span className="absolute -bottom-2 w-1 h-1 bg-emerald-400 rounded-full" />}
+        </button>
+        <button 
+          onClick={() => setActiveTab('analytics')}
+          className={`relative flex flex-col items-center gap-1 transition-all duration-300 flex-1 ${activeTab === 'analytics' ? 'text-emerald-400 -translate-y-1' : 'text-slate-400 hover:text-slate-300'}`}
+        >
+          <BarChart2 size={20} strokeWidth={activeTab === 'analytics' ? 2.5 : 2} />
+          {activeTab === 'analytics' && <span className="absolute -bottom-2 w-1 h-1 bg-emerald-400 rounded-full" />}
         </button>
         
         {/* Center Add Button */}
-        <div className="relative -top-6 mx-2">
+        <div className="relative -top-5 mx-1 shrink-0">
           <button 
             onClick={() => setShowCravingModal(true)}
-            className="w-14 h-14 bg-gradient-to-tr from-emerald-600 to-emerald-400 rounded-full flex items-center justify-center text-white emerald-glow hover:scale-105 transition-transform"
+            className="w-12 h-12 bg-gradient-to-tr from-emerald-600 to-emerald-400 rounded-full flex items-center justify-center text-white emerald-glow hover:scale-105 transition-transform"
           >
-            <Plus size={28} strokeWidth={2.5} />
+            <Plus size={24} strokeWidth={2.5} />
           </button>
         </div>
 
         <button 
           onClick={() => setActiveTab('support')}
-          className={`relative flex flex-col items-center gap-1 transition-all duration-300 w-12 ${activeTab === 'support' ? 'text-emerald-400 -translate-y-1' : 'text-slate-400 hover:text-slate-300'}`}
+          className={`relative flex flex-col items-center gap-1 transition-all duration-300 flex-1 ${activeTab === 'support' ? 'text-emerald-400 -translate-y-1' : 'text-slate-400 hover:text-slate-300'}`}
         >
-          <ShieldCheck size={22} strokeWidth={activeTab === 'support' ? 2.5 : 2} />
+          <ShieldCheck size={20} strokeWidth={activeTab === 'support' ? 2.5 : 2} />
           {activeTab === 'support' && <span className="absolute -bottom-2 w-1 h-1 bg-emerald-400 rounded-full" />}
         </button>
         <button 
           onClick={() => setActiveTab('exercise')}
-          className={`relative flex flex-col items-center gap-1 transition-all duration-300 w-12 ${activeTab === 'exercise' ? 'text-emerald-400 -translate-y-1' : 'text-slate-400 hover:text-slate-300'}`}
+          className={`relative flex flex-col items-center gap-1 transition-all duration-300 flex-1 ${activeTab === 'exercise' ? 'text-emerald-400 -translate-y-1' : 'text-slate-400 hover:text-slate-300'}`}
         >
-          <Wind size={22} strokeWidth={activeTab === 'exercise' ? 2.5 : 2} />
+          <Wind size={20} strokeWidth={activeTab === 'exercise' ? 2.5 : 2} />
           {activeTab === 'exercise' && <span className="absolute -bottom-2 w-1 h-1 bg-emerald-400 rounded-full" />}
+        </button>
+        <button 
+          onClick={() => setActiveTab('coach')}
+          className={`relative flex flex-col items-center gap-1 transition-all duration-300 flex-1 ${activeTab === 'coach' ? 'text-emerald-400 -translate-y-1' : 'text-slate-400 hover:text-slate-300'}`}
+        >
+          <Bot size={20} strokeWidth={activeTab === 'coach' ? 2.5 : 2} />
+          {activeTab === 'coach' && <span className="absolute -bottom-2 w-1 h-1 bg-emerald-400 rounded-full" />}
         </button>
       </div>
 
